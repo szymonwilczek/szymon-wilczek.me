@@ -49,6 +49,7 @@ Each theme gets four pictures:
 - [[#au-parchment-day][au-parchment-day]]: Almost monochrome: italics and brightness steps instead of colour.
 - [[#au-salina-day][au-salina-day]]: The coast in daylight: salt flats, sand dunes, deep cobalt ocean, driftwood and brine pink.
 - [[#au-herbarium-day][au-herbarium-day]]: Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
+- [[#au-perseida-day][au-perseida-day]]: The dawn after a meteor night: a cool pearl sky, comments fading like the last stars, Venus as the cursor.
 
 *[[#dark-themes][Dark themes]]*
 
@@ -59,6 +60,7 @@ Best viewed on a dark page :)
 - [[#au-parchment-night][au-parchment-night]]: Almost monochrome: italics and brightness steps instead of colour.
 - [[#au-salina-night][au-salina-night]]: Midnight ocean, dark basalt, phosphorescent turquoise and maritime coral.
 - [[#au-herbarium-night][au-herbarium-night]]: Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
+- [[#au-perseida-night][au-perseida-night]]: An August meteor night: a black sky, syntax in the colours of real stars and nebulae, a blue-white star as the cursor.
 - [[#au-mysterium][au-mysterium]]: A Halloween night and an old painted van parked outside a haunted mansion: a near-black canvas, faded teal keywords, a dry yellow-green and burnt orange, with a muted purple over the region.
 
 * Light themes
@@ -168,6 +170,23 @@ Best viewed on a dark page :)
 #+attr_html: :alt au-herbarium-day theme Org sample :loading lazy
 [[/assets/au-themes/au-herbarium-day-org.png][file:/assets/au-themes/thumbs/au-herbarium-day-org-600.webp]]
 
+** au-perseida-day
+:PROPERTIES:
+:CUSTOM_ID: au-perseida-day
+:END:
+
+#+attr_html: :alt au-perseida-day theme code sample :loading lazy
+[[/assets/au-themes/au-perseida-day.png][file:/assets/au-themes/thumbs/au-perseida-day-600.webp]]
+
+#+attr_html: :alt au-perseida-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-perseida-day-git.png][file:/assets/au-themes/thumbs/au-perseida-day-git-600.webp]]
+
+#+attr_html: :alt au-perseida-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-perseida-day-dired.png][file:/assets/au-themes/thumbs/au-perseida-day-dired-600.webp]]
+
+#+attr_html: :alt au-perseida-day theme Org sample :loading lazy
+[[/assets/au-themes/au-perseida-day-org.png][file:/assets/au-themes/thumbs/au-perseida-day-org-600.webp]]
+
 * Dark themes
 :PROPERTIES:
 :CUSTOM_ID: dark-themes
@@ -257,6 +276,23 @@ Best viewed on a dark page :)
 
 #+attr_html: :alt au-herbarium-night theme Org sample :loading lazy
 [[/assets/au-themes/au-herbarium-night-org.png][file:/assets/au-themes/thumbs/au-herbarium-night-org-600.webp]]
+
+** au-perseida-night
+:PROPERTIES:
+:CUSTOM_ID: au-perseida-night
+:END:
+
+#+attr_html: :alt au-perseida-night theme code sample :loading lazy
+[[/assets/au-themes/au-perseida-night.png][file:/assets/au-themes/thumbs/au-perseida-night-600.webp]]
+
+#+attr_html: :alt au-perseida-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-perseida-night-git.png][file:/assets/au-themes/thumbs/au-perseida-night-git-600.webp]]
+
+#+attr_html: :alt au-perseida-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-perseida-night-dired.png][file:/assets/au-themes/thumbs/au-perseida-night-dired-600.webp]]
+
+#+attr_html: :alt au-perseida-night theme Org sample :loading lazy
+[[/assets/au-themes/au-perseida-night-org.png][file:/assets/au-themes/thumbs/au-perseida-night-org-600.webp]]
 
 ** au-mysterium
 :PROPERTIES:
