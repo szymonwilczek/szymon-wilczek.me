@@ -51,6 +51,7 @@ Each theme gets four pictures:
 - [[#au-herbarium-day][au-herbarium-day]]: Pressed sage leaves, dried lavender, oak-bark ink and chamomile pollen.
 - [[#au-perseida-day][au-perseida-day]]: The dawn after a meteor night: a cool pearl sky, comments fading like the last stars, Venus as the cursor.
 - [[#au-yerba-day][au-yerba-day]]: A yerba mate gourd in daylight: dried-leaf paper, fresh leaf keywords, a gourd type and cinnamon bark properties.
+- [[#au-pluvia-day][au-pluvia-day]]: A rainy day at home: an overcast grey canvas, ink text, slate types, a blue umbrella for functions and wet brick strings.
 
 *[[#dark-themes][Dark themes]]*
 
@@ -63,6 +64,7 @@ Best viewed on a dark page :)
 - [[#au-herbarium-night][au-herbarium-night]]: Pressed sage, dried lavender, oak-gall ink, terracotta flora and chamomile pollen.
 - [[#au-perseida-night][au-perseida-night]]: An August meteor night: a black sky, syntax in the colours of real stars and nebulae, a blue-white star as the cursor.
 - [[#au-yerba-night][au-yerba-night]]: The same gourd at night: a dark olive canvas, foam-coloured text, orange peel types and rosehip numbers.
+- [[#au-pluvia-night][au-pluvia-night]]: The same rain at night, seen through the window: a black canvas, plain grey text, wet stone keywords and light reflected in the wet.
 - [[#au-mysterium][au-mysterium]]: A Halloween night and an old painted van parked outside a haunted mansion: a near-black canvas, faded teal keywords, a dry yellow-green and burnt orange, with a muted purple over the region.
 
 * Light themes
@@ -206,6 +208,23 @@ Best viewed on a dark page :)
 #+attr_html: :alt au-yerba-day theme Org sample :loading lazy
 [[/assets/au-themes/au-yerba-day-org.png][file:/assets/au-themes/thumbs/au-yerba-day-org-600.webp]]
 
+** au-pluvia-day
+:PROPERTIES:
+:CUSTOM_ID: au-pluvia-day
+:END:
+
+#+attr_html: :alt au-pluvia-day theme code sample :loading lazy
+[[/assets/au-themes/au-pluvia-day.png][file:/assets/au-themes/thumbs/au-pluvia-day-600.webp]]
+
+#+attr_html: :alt au-pluvia-day theme Magit sample :loading lazy
+[[/assets/au-themes/au-pluvia-day-git.png][file:/assets/au-themes/thumbs/au-pluvia-day-git-600.webp]]
+
+#+attr_html: :alt au-pluvia-day theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-pluvia-day-dired.png][file:/assets/au-themes/thumbs/au-pluvia-day-dired-600.webp]]
+
+#+attr_html: :alt au-pluvia-day theme Org sample :loading lazy
+[[/assets/au-themes/au-pluvia-day-org.png][file:/assets/au-themes/thumbs/au-pluvia-day-org-600.webp]]
+
 * Dark themes
 :PROPERTIES:
 :CUSTOM_ID: dark-themes
@@ -329,6 +348,23 @@ Best viewed on a dark page :)
 
 #+attr_html: :alt au-yerba-night theme Org sample :loading lazy
 [[/assets/au-themes/au-yerba-night-org.png][file:/assets/au-themes/thumbs/au-yerba-night-org-600.webp]]
+
+** au-pluvia-night
+:PROPERTIES:
+:CUSTOM_ID: au-pluvia-night
+:END:
+
+#+attr_html: :alt au-pluvia-night theme code sample :loading lazy
+[[/assets/au-themes/au-pluvia-night.png][file:/assets/au-themes/thumbs/au-pluvia-night-600.webp]]
+
+#+attr_html: :alt au-pluvia-night theme Magit sample :loading lazy
+[[/assets/au-themes/au-pluvia-night-git.png][file:/assets/au-themes/thumbs/au-pluvia-night-git-600.webp]]
+
+#+attr_html: :alt au-pluvia-night theme Dired and completion sample :loading lazy
+[[/assets/au-themes/au-pluvia-night-dired.png][file:/assets/au-themes/thumbs/au-pluvia-night-dired-600.webp]]
+
+#+attr_html: :alt au-pluvia-night theme Org sample :loading lazy
+[[/assets/au-themes/au-pluvia-night-org.png][file:/assets/au-themes/thumbs/au-pluvia-night-org-600.webp]]
 
 ** au-mysterium
 :PROPERTIES:
