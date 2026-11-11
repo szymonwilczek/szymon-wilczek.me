@@ -102,10 +102,10 @@ export const TOOLS: Tool[] = [
     why: "Where the built site is served from.",
   },
   {
-    name: "Onionite",
+    name: "HHKB Professional HYBRID Type-S",
     graphic: "whisk",
     group: "off the screen",
-    why: "Modded to the bone: Akko black switches, tape, sand and spacebar mods, more inside the frame. A NuPhy Air V3 is next in some time.",
+    why: "A legend, and the best typing keyboard I've ever had in my life. Switched to silent Topre, and I never plan on replacing it.",
   },
   {
     name: "Talos 7",
