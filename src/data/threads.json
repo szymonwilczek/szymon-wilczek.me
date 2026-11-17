@@ -1,4 +1,34 @@
 {
+  "6eb054325e3b": {
+    "versions": [
+      {
+        "version": "v1",
+        "sent": "16 Nov 2026",
+        "url": "https://yhetil.org/emacs/87a4n8cqp3.fsf%40gmail.com/"
+      }
+    ],
+    "messages": [
+      {
+        "version": "v1",
+        "who": "Szymon Wilczek",
+        "role": "author",
+        "date": "16 Nov 2026",
+        "depth": 0,
+        "kind": "patch",
+        "subject": "bug#82264: 31.1; [PATCH] color-srgb-to-xyz: wrong constants (12.95, 0.21266729)",
+        "text": "`color-srgb-to-xyz' in lisp/color.el has two typos in its \nconstants\n(present in Emacs 31.1 and on master):\n\n1. The linear segment divides by 12.95:\n\n     (/ red 12.95)\n\n   The sRGB specification (IEC 61966-2-1) uses 12.92, and so does \n   the\n   inverse, `color-xyz-to-srgb' ((* 12.92 r)).\n\n2. The red coefficient of Y is 0.21266729:\n\n     (+ (* 0.21266729 r) (* 0.7151522 g) (* 0.0721750 b))\n\n   It should be 0.2126729, which matches the other matrix entries\n   (0.4124564, 0.3575761, ...) and the inverse matrix used in\n   `color-xyz-to-srgb'.\n\nBecause of this, white does not map to Y = 1 and the two functions \ndo\nnot round-trip.  From emacs -Q:\n\n  (nth 1 (color-srgb-to-xyz 1.0 1.0 1.0))\n    => 0.99999449  (expected 1.0)\n\n  (apply #'color-xyz-to-srgb (color-srgb-to-xyz 0.03 0.03 0.03))\n    => (0.0299308 0.0299302 0.0299305)  (expected 0.03 0.03 0.03)\n\n  (apply #'color-xyz-to-srgb (color-srgb-to-xyz 1.0 1.0 1.0))\n    => (1.0000037 0.9999954 1.0000005)\n\nWith the attached patch the round trip is exact to about 1e-7, and\nwhite gives Y = 1.0000001.\n\nThe errors propagate to `color-srgb-to-lab' and \n`color-cie-de2000'.\nThe expected values in test/lisp/color-tests.el had been computed\nwith the typos, so the patch updates them too.  I checked the new\nL*a*b* value for sRGB (0.1 0.2 0.3) independently from the\nspecification, using the D65 white point from `color-d65-xyz'; it\nagrees with the patched code.\n\nI found this while computing relative luminance for a theme \npackage\n(au-themes), which uses `color-srgb-to-xyz' for it.\n\nThanks,\nSzymon Wilczek"
+      },
+      {
+        "version": "v1",
+        "who": "Eli Zaretskii",
+        "role": "maintainer",
+        "date": "17 Nov 2026",
+        "depth": 1,
+        "kind": "applied",
+        "text": "Thanks, I've now installed your patch on the master branch, and I'm\ntherefore closing this bug."
+      }
+    ]
+  },
   "440b7035bbe0": {
     "versions": [
       {
