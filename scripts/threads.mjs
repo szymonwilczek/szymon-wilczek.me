@@ -6,13 +6,14 @@
 import { gunzipSync } from "node:zlib";
 
 const LORE = "https://lore.kernel.org/all/";
+const GNU = "https://yhetil.org/emacs/";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PAGE = 100;
 const DAY_MS = 86_400_000;
 const SAME_MOMENT_MS = 60_000;
 
 const BOT = /syzbot|lkp@intel\.com|test robot|-bot\b|\bbot@|stable@/i;
-const APPLIED = /\b(applied|queued|picked up|merged)\b/i;
+const APPLIED = /\b(applied|queued|picked up|merged|installed|installer)\b/i;
 const ATTRIBUTION = /^(On .*wrote:|.* writes:|.* wrote:|.*写道[:：])$/;
 const VERSION = /\[[^\]]*PATCH[^\]]*?\bv(\d+)\b[^\]]*\]/i;
 
@@ -112,7 +113,7 @@ function splitPatch(body) {
     .join("\n")
     .trim();
   const diff = diffStart === -1 ? "" : lines.slice(diffStart, end).join("\n").trimEnd();
-  return { message, notes, diff };
+  return { message, notes: notes || (diffStart === -1 && cut === -1 ? body.trim() : notes), diff };
 }
 
 // what someone wrote in a reply: their own words,
@@ -157,9 +158,18 @@ function versionOf(subject) {
   return `v${VERSION.exec(subject)?.[1] ?? 1}`;
 }
 
-function threadFor(mails, roles) {
+function archiveUrl(archive, id) {
+  return archive === GNU
+    ? `${archive}${encodeURIComponent(id)}/`
+    : `https://lore.kernel.org/r/${id}`;
+}
+
+function threadFor(mails, roles, archive = LORE) {
   const byId = new Map(mails.map((mail) => [mail.id, mail]));
-  const isPatch = (mail) => /^(\[[^\]]*\]\s*)*\[[^\]]*PATCH/i.test(mail.subject);
+  const isPatch = (mail) =>
+    /\[[^\]]*PATCH/i.test(mail.subject) &&
+    !/^re:\s*/i.test(mail.subject) &&
+    (!mail.parent || roles.get(mail.who) === "author");
   const rootOf = (mail) => {
     let at = mail;
     while (!isPatch(at) && byId.has(at.parent)) at = byId.get(at.parent);
@@ -180,7 +190,7 @@ function threadFor(mails, roles) {
       return {
         version: versionOf(mail.subject),
         sent: dayMonthYear(mail.date),
-        url: `https://lore.kernel.org/r/${mail.id}`,
+        url: archiveUrl(archive, mail.id),
         ...(merged ? {} : { message, diff }),
       };
     });
@@ -215,50 +225,71 @@ function threadFor(mails, roles) {
 }
 
 const LINKED = /(?:lore\.kernel\.org\/(?:[\w.-]+\/)?|patch\.msgid\.link\/)([^/\s]+@[^/\s]+)/;
-const isSent = (mail) => /^\[[^\]]*PATCH/i.test(mail.subject);
+const isSent = (mail) => /\[[^\]]*PATCH/i.test(mail.subject);
 
 async function mbox(response) {
   if (!response.ok) return [];
   return parseMbox(gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8"));
 }
 
-async function search(query) {
+async function search(query, archive = LORE) {
   const params = new URLSearchParams({ q: query, x: "m" });
-  return (await mbox(await fetch(`${LORE}?${params}`, { method: "POST" }))).filter(isSent);
+  if (archive === GNU) {
+    const form = new URLSearchParams({ z: "results only" });
+    return (await mbox(await fetch(`${archive}?${params}`, { method: "POST", body: form }))).filter(
+      isSent,
+    );
+  }
+  return (await mbox(await fetch(`${archive}?${params}`, { method: "POST" }))).filter(isSent);
 }
 
 const loreDay = (date) => date.toISOString().slice(0, 10).replace(/-/g, "");
 
-async function sentIds(commit, emails) {
+async function sentIds(commit, emails, archive = LORE) {
   const ids = new Set();
   const linked = LINKED.exec(commit.message)?.[1];
   if (linked) ids.add(decodeURIComponent(linked));
   const from = `(${emails.map((email) => `f:${email}`).join(" OR ")})`;
+  const bug = /\(Bug#(\d+)\)/i.exec(commit.message)?.[1];
+  if (bug) {
+    const found = await search(`${bug} AND ${from}`, archive);
+    for (const mail of found) ids.add(mail.id);
+    if (found.length > 0) return ids;
+  }
   const subject = commit.message.split("\n")[0].replace(/"/g, "");
   const title = subject.slice(subject.indexOf(": ") + 1).trim();
   for (const words of new Set([subject, title])) {
-    const found = await search(`s:"${words}" AND ${from}`);
+    const found = await search(`s:"${words}" AND ${from}`, archive);
     for (const mail of found) ids.add(mail.id);
     if (found.length > 0) return ids;
   }
   if (ids.size > 0) return ids;
   const authored = new Date(commit.authored);
   const window = `d:${loreDay(new Date(authored - DAY_MS))}..${loreDay(new Date(+authored + DAY_MS))}`;
-  const sameMoment = (await search(`${window} AND ${from}`)).filter(
+  const sameMoment = (await search(`${window} AND ${from}`, archive)).filter(
     (mail) => Math.abs(mail.date - authored) < SAME_MOMENT_MS,
   );
   for (const mail of sameMoment) ids.add(mail.id);
   return ids;
 }
 
+function archivesFor(commit) {
+  if (commit.repo === "emacs-mirror/emacs") return [GNU, LORE];
+  return [LORE, GNU];
+}
+
 export async function listThread(commit, author, emails) {
-  const mails = [];
-  for (const id of await sentIds(commit, emails)) {
-    mails.push(...(await mbox(await fetch(`${LORE}${encodeURIComponent(id)}/t.mbox.gz`))));
+  for (const archive of archivesFor(commit)) {
+    const mails = [];
+    for (const id of await sentIds(commit, emails, archive)) {
+      mails.push(...(await mbox(await fetch(`${archive}${encodeURIComponent(id)}/t.mbox.gz`))));
+    }
+    if (mails.length > 0) {
+      const unique = [...new Map(mails.map((mail) => [mail.id, mail])).values()];
+      return threadFor(unique, rolesFrom(commit, author), archive);
+    }
   }
-  if (mails.length === 0) return null;
-  const unique = [...new Map(mails.map((mail) => [mail.id, mail])).values()];
-  return threadFor(unique, rolesFrom(commit, author));
+  return null;
 }
 
 export async function pullThread(item, me, github) {

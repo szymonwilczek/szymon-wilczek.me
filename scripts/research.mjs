@@ -46,6 +46,11 @@ async function github(path, { allowMissing = false, accept = "application/vnd.gi
     const response = await fetch(path.startsWith("http") ? path : `${API}${path}`, { headers });
     if (allowMissing && [404, 422].includes(response.status)) return null;
     if (response.ok) return response.json();
+    if ((response.status === 403 || response.status === 429) && attempt < RETRIES) {
+      const wait = parseInt(response.headers.get("retry-after") ?? "5", 10);
+      await new Promise((r) => setTimeout(r, Math.max(wait, 2) * 1000));
+      continue;
+    }
     if (response.status < 500 || attempt === RETRIES)
       throw new Error(`${path}: ${response.status}`);
   }
@@ -58,7 +63,9 @@ async function search(kind, query) {
     const found = await github(`search/${kind}?${params}`);
     items.push(...found.items);
     if (items.length >= found.total_count || found.items.length < PAGE) break;
+    await new Promise((r) => setTimeout(r, 1000));
   }
+  await new Promise((r) => setTimeout(r, 1000));
   return items;
 }
 
@@ -190,7 +197,10 @@ async function homeOf(sha, hits) {
   return null;
 }
 
-const knownRepos = new Set(saved.filter((item) => item.kind === "commit").map((item) => item.repo));
+const knownRepos = new Set([
+  ...saved.filter((item) => item.kind === "commit").map((item) => item.repo),
+  "emacs-mirror/emacs",
+]);
 
 // a backport keeps the subject and gets a new sha
 const savedSubjects = new Set(saved.map((item) => (item.message ?? item.title).split("\n")[0]));
