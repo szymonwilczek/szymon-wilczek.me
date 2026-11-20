@@ -1,0 +1,12 @@
+{
+  "title": "EK OID LOTA",
+  "description": "Sealed binary archive (17.8 KB).",
+  "date": "2026-11-20",
+  "type": "file",
+  "filename": "ek-oid.zip",
+  "filesize": "17.8 KB",
+  "sha256": "14f307f2bec3abb3f87701cd62e0ecce06d03ff53245d3cfb1c505729d62d76b",
+  "encryptedUrl": "/downloads/ek-oid.zip.enc",
+  "iv": "hGCgQjXFfzsAoerR",
+  "salt": "SnU44MILPpoOtzE7tvY2zQ=="
+}
