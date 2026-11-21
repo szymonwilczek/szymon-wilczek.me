@@ -7,7 +7,7 @@ const MIB = KIB * KIB;
 const MB = 1_000_000;
 const GB = 1_000_000_000;
 
-export const LIFETIME_SECONDS = 24 * 60 * 60;
+export const LIFETIME_SECONDS = 3 * 24 * 60 * 60;
 export const UNFINISHED_SECONDS = 60 * 60;
 
 export const MAX_TEXT_BYTES = 10 * MB;

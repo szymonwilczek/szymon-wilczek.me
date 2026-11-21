@@ -23,6 +23,7 @@ const COPIED_FOR_MS = 1400;
 const MS_PER_SECOND = 1000;
 const MS_PER_MINUTE = 60_000;
 const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
 const SECONDS_PER_MINUTE = 60;
 const PERCENT = 100;
 const CHUNK_ATTEMPTS = 3;
@@ -282,7 +283,10 @@ function put(
 
 function left(until: Date): string {
   const minutes = Math.max(0, Math.round((until.getTime() - Date.now()) / MS_PER_MINUTE));
-  return `${Math.floor(minutes / MINUTES_PER_HOUR)} h ${minutes % MINUTES_PER_HOUR} min left`;
+  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+  if (hours >= HOURS_PER_DAY)
+    return `${Math.floor(hours / HOURS_PER_DAY)} d ${hours % HOURS_PER_DAY} h left`;
+  return `${hours} h ${minutes % MINUTES_PER_HOUR} min left`;
 }
 
 function seconds(total: number): string {

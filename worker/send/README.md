@@ -21,7 +21,7 @@ brings up the browser's own Basic Auth prompt (any name, that password);
 the password is kept only as a salted hash. The bytes themselves are not
 encrypted: the Worker is the lock.
 
-Everything lives one day from the moment it starts. Uploads that never
+Everything lives three days from the moment it starts. Uploads that never
 finish are swept after an hour.
 
 ## How it is kept
@@ -31,7 +31,7 @@ finish are swept after an hour.
   of it. Its alarm is always set for the next send due.
 - `Shard` (one per 512 MiB of a send): the bytes, in 2 MiB rows numbered
   across the whole send, so any byte range is a lookup; that is what lets a
-  video seek. Each shard's own alarm empties it after the day, too.
+  video seek. Each shard's own alarm empties it after three days, too.
 
 The page sends 32 MiB a request (`PUT /:id/:chunk`), with a token it got
 from `POST /`; `POST /:id/done` checks every byte is in before the link

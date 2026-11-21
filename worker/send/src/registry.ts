@@ -1,6 +1,6 @@
 // The one list of sends: what each is, who may upload to it, when it goes.
 // It also keeps the pool: a send only starts if the account still has room for all of it.
-// One alarm, always set for the next send due: a finished one after its day,
+// One alarm, always set for the next send due: a finished one after its three days,
 // an unfinished one after UNFINISHED_SECONDS.
 
 import { DurableObject } from "cloudflare:workers";
@@ -115,7 +115,7 @@ export class Registry extends DurableObject<RegistryEnv> {
     return send ?? null;
   }
 
-  // a finished send, still within its day
+  // a finished send, still within its three days
   opened(id: string): Send | null {
     const [send] = this.ctx.storage.sql
       .exec<Send>("SELECT * FROM sends WHERE id = ? AND done = 1 AND expires > ?", id, Date.now())
@@ -168,7 +168,10 @@ export class Registry extends DurableObject<RegistryEnv> {
     const { next } = this.ctx.storage.sql
       .exec<{
         next: number | null;
-      }>("SELECT MIN(CASE WHEN done = 1 THEN expires ELSE MIN(expires, started + ?) END) AS next FROM sends", UNFINISHED_SECONDS * MS_PER_SECOND)
+      }>(
+        "SELECT MIN(CASE WHEN done = 1 THEN expires ELSE MIN(expires, started + ?) END) AS next FROM sends",
+        UNFINISHED_SECONDS * MS_PER_SECOND,
+      )
       .one();
     if (next === null) await this.ctx.storage.deleteAlarm();
     else await this.ctx.storage.setAlarm(next);

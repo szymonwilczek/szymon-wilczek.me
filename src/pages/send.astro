@@ -12,7 +12,7 @@ const PAGE_SHADOW_OFFSET = "translate(5 9)";
 const PLACEHOLDER = [
   ";; This buffer is for text that is not saved, and for files",
   ";; that will not stay. To keep anything, open the link",
-  ";; within a day; after that, it is garbage collected.",
+  ";; within three days; after that, it is garbage collected.",
 ].join("\n");
 const UNKNOWN_ID = "·".repeat(ID_LENGTH);
 const TRACK_HEIGHT = 26;
@@ -32,7 +32,7 @@ const SHADOW_OFFSET = `translate(${0.25 * UNIT} ${0.45 * UNIT})`;
   <header class="send-head">
     <p class="crumb">send · 送</p>
     <h1>Send</h1>
-    <p class="lede">Text and files from one of my screens to another. One day to live.</p>
+    <p class="lede">Text and files from one of my screens to another. Three days to live.</p>
   </header>
 
   <Divider from={600} to={840} />

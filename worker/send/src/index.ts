@@ -5,7 +5,7 @@
 //   PUT    /:id/:chunk      one chunk of the bytes, with the upload's token
 //   POST   /:id/done        every chunk is in; the link opens from now on
 //   DELETE /:id             stop: the upload and all of it goes
-//   GET    /:id             the thing itself, for a day;
+//   GET    /:id             the thing itself, for three days;
 //                           locked one asks for its password first
 //
 // Secret: SEND_WORD (the password I type on /send/)

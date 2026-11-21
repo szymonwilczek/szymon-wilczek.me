@@ -1,6 +1,6 @@
 // One shard of one send: up to SHARD_BYTES of its bytes, in rows of ROW_BYTES.
 // Rows are numbered across the whole send, so byte n always sits in row n / ROW_BYTES.
-// The alarm set by the first chunk empties the shard when the send's day is over.
+// The alarm set by the first chunk empties the shard when the send's three days are over.
 
 import { DurableObject } from "cloudflare:workers";
 import { CHUNK_BYTES, ROW_BYTES, ROWS_PER_CHUNK } from "../../../src/utils/send";
