@@ -48,6 +48,7 @@ enough, no card):
 ```sh
 npx wrangler login
 npx wrangler secret put SEND_WORD   # the password typed on /send/
+npx wrangler secret put LIST_WORD   # the password for /list
 npx wrangler deploy
 ```
 
@@ -59,10 +60,15 @@ The password is only ever a Worker secret: it is never in the repository
 and never in the site's build. `/send/` asks for it and, after it fits
 once, remembers it in that browser.
 
+`/list` shows what is kept right now, one send a line: its link, size,
+time left, and what it is (locked or still uploading, too). It asks for
+`LIST_WORD` with the browser's Basic Auth prompt; until that secret is
+set it answers 503.
+
 To try it locally, without an account:
 
 ```sh
-npx wrangler dev --local --var SEND_WORD:test
+npx wrangler dev --local --var SEND_WORD:test --var LIST_WORD:test
 ```
 
 ## Limits

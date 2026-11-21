@@ -1,5 +1,6 @@
 // Text and files passed between my own devices
 //   GET    /free            the room left in the pool, for the page
+//   GET    /list            what is kept right now, behind a Basic prompt with LIST_WORD
 //   POST   /                {word, kind, size, ...} from /send/ only, with my word;
 //                           answers {id, token, until}
 //   PUT    /:id/:chunk      one chunk of the bytes, with the upload's token
@@ -8,7 +9,8 @@
 //   GET    /:id             the thing itself, for three days;
 //                           locked one asks for its password first
 //
-// Secret: SEND_WORD (the password I type on /send/)
+// Secrets: SEND_WORD (the password I type on /send/),
+//          LIST_WORD (the password for /list)
 
 import {
   CHUNK_BYTES,
@@ -25,7 +27,7 @@ import {
   type NewSend,
   type Started,
 } from "../../../src/utils/send";
-import { Registry, shardOf, type Fresh, type Send } from "./registry";
+import { Registry, shardOf, type Fresh, type Listed, type Send } from "./registry";
 import { equalHashes, randomSalt, same, sha256 } from "./secret";
 import type { Shard } from "./shard";
 
@@ -38,6 +40,7 @@ interface Env {
   WRITES: RateLimit;
   GUESSES: RateLimit;
   SEND_WORD: string;
+  LIST_WORD: string;
   ORIGINS: string; // comma-separated
 }
 
@@ -53,6 +56,10 @@ const SHOWN =
 const SANDBOX =
   "sandbox; default-src 'none'; img-src 'self'; media-src 'self'; style-src 'unsafe-inline'";
 const RANGE = /^bytes=(\d*)-(\d*)$/;
+const MS_PER_MINUTE = 60_000;
+const MINUTES_PER_HOUR = 60;
+const HOURS_PER_DAY = 24;
+const SIZE_COLUMN = 10;
 
 const registry = (env: Env) => env.REGISTRY.get(env.REGISTRY.idFromName("registry"));
 
@@ -63,6 +70,7 @@ export default {
     try {
       if (id === "" && extra === undefined && step === undefined) return await start(request, env);
       if (id === "free" && step === undefined) return await free(request, env);
+      if (id === "list" && step === undefined) return await list(url, request, env);
       if (!ID_PATTERN.test(id) || extra !== undefined) return text("not here", 404);
       if (step === undefined) {
         if (request.method === "GET" || request.method === "HEAD")
@@ -109,6 +117,49 @@ const free = (request: Request, env: Env) =>
   guarded(request, env, "GET", async (cors) =>
     json({ free: await registry(env).free(), pool: POOL_BYTES }, cors),
   );
+
+// one line a send: its link, how big, what it is, how long it has left
+async function list(url: URL, request: Request, env: Env): Promise<Response> {
+  if (request.method !== "GET") return text("GET only", 405);
+  if (!env.LIST_WORD) return text("the password is not set", 503);
+  const given = password(request.headers.get("authorization"));
+  if (given === null || !(await same(given, env.LIST_WORD))) {
+    if (given !== null) {
+      const ip = request.headers.get("cf-connecting-ip") || "";
+      if (!(await env.GUESSES.limit({ key: ip })).success) return text("slow down", 429);
+    }
+    return text("locked", 401, { "www-authenticate": `Basic realm="send list", charset="UTF-8"` });
+  }
+
+  const sends = await registry(env).listed();
+  if (sends.length === 0) return text("nothing kept right now\n");
+  const lines = sends.map((send) => listLine(url.origin, send));
+  return text(`${lines.join("\n")}\n`);
+}
+
+function listLine(origin: string, send: Listed): string {
+  const what =
+    send.kind === "file"
+      ? send.name || "file"
+      : send.kind === "text" && send.extension
+        ? `text .${send.extension}`
+        : send.kind;
+  const marks = [send.locked ? "locked" : "", send.done ? "" : "uploading"].filter(Boolean);
+  return [
+    `${origin}/${send.id}`,
+    bytes(send.size).padStart(SIZE_COLUMN),
+    timeLeft(send.goes),
+    what + (marks.length > 0 ? ` (${marks.join(", ")})` : ""),
+  ].join("  ");
+}
+
+function timeLeft(goes: number): string {
+  const minutes = Math.max(0, Math.round((goes - Date.now()) / MS_PER_MINUTE));
+  const hours = Math.floor(minutes / MINUTES_PER_HOUR);
+  if (hours >= HOURS_PER_DAY)
+    return `${Math.floor(hours / HOURS_PER_DAY)} d ${hours % HOURS_PER_DAY} h`;
+  return `${hours} h ${minutes % MINUTES_PER_HOUR} min`;
+}
 
 async function start(request: Request, env: Env): Promise<Response> {
   if (request.method === "GET")

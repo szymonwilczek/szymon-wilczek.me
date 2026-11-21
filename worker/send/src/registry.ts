@@ -36,6 +36,11 @@ export interface Send {
   done: number;
 }
 
+export type Listed = Pick<Send, "id" | "kind" | "name" | "extension" | "size" | "done"> & {
+  locked: number;
+  goes: number;
+};
+
 export type Fresh = Pick<
   Send,
   "kind" | "name" | "type" | "extension" | "size" | "lock_salt" | "lock_hash"
@@ -121,6 +126,18 @@ export class Registry extends DurableObject<RegistryEnv> {
       .exec<Send>("SELECT * FROM sends WHERE id = ? AND done = 1 AND expires > ?", id, Date.now())
       .toArray();
     return send ?? null;
+  }
+
+  // everything kept right now, oldest first, without tokens or hashes; for /list
+  listed(): Listed[] {
+    return this.ctx.storage.sql
+      .exec<Listed>(
+        `SELECT id, kind, name, extension, size, lock_hash IS NOT NULL AS locked, done,
+                CASE WHEN done = 1 THEN expires ELSE MIN(expires, started + ?) END AS goes
+         FROM sends ORDER BY started`,
+        UNFINISHED_SECONDS * MS_PER_SECOND,
+      )
+      .toArray();
   }
 
   // the link opens only once every byte announced is in
