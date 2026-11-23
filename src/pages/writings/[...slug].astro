@@ -8,6 +8,7 @@ import Signature from "../../components/Signature.astro";
 import Suzume from "../../components/Suzume.astro";
 import { getCollection } from "astro:content";
 import { renderContentEntry } from "../../utils/org";
+import { hasMath, mathStyles } from "../../utils/org-math";
 import { calculateReadingStats } from "../../utils/reading-time";
 import { dottedDate, writingSlug } from "../../utils/format";
 import { mendsOf } from "../../utils/mended";
@@ -52,6 +53,7 @@ const scholarDate = (date: Date) => date.toISOString().slice(0, 10).replaceAll("
   wordCount={stats.words}
 >
   <Fragment slot="head">
+    {html && hasMath(html) && <style is:inline set:html={mathStyles} />}
     <meta name="citation_title" content={post.data.title} />
     <meta name="citation_author" content="Wilczek, Szymon" />
     <meta name="citation_publication_date" content={scholarDate(post.data.pubDate)} />

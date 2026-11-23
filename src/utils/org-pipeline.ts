@@ -4,6 +4,22 @@ import uniorgRehype from "uniorg-rehype";
 import rehypeStringify from "rehype-stringify";
 import { visit } from "unist-util-visit";
 
+export const MATH_CLASS = "math";
+export const DISPLAY_MATH_CLASS = "math-display";
+const DISPLAY_MATH_DELIMITERS = ["\\[", "$$"];
+
+// uniorg turns \( \) and \[ \] alike into span.math-inline,
+// so display fragments get their class before the hast step
+function uniorgDisplayMath() {
+  return (tree: any) => {
+    visit(tree, "latex-fragment", (node: any) => {
+      if (!DISPLAY_MATH_DELIMITERS.some((delimiter) => node.value.startsWith(delimiter))) return;
+      node.data = node.data || {};
+      node.data.hProperties = { className: [MATH_CLASS, DISPLAY_MATH_CLASS] };
+    });
+  };
+}
+
 export const auTheme = {
   name: "au",
   type: "dark" as const,
@@ -514,6 +530,7 @@ export function orgProcessor(highlighter: any, plugins: any[] = []) {
   return unified()
     .use(uniorgParse)
     .use(uniorgHeadlines)
+    .use(uniorgDisplayMath)
     .use(uniorgRehype)
     .use(rehypeOrgEnhancements)
     .use(rehypeShikiHighlight, highlighter)

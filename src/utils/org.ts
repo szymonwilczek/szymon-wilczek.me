@@ -2,6 +2,7 @@ import { createHighlighter } from "shiki";
 import { render } from "astro:content";
 import { auTheme, orgProcessor } from "./org-pipeline";
 import { rehypeSizedImages } from "./org-images";
+import { rehypeTemml } from "./org-math";
 
 let highlighterInstance: any = null;
 
@@ -46,7 +47,9 @@ export async function renderOrg(orgContent: string): Promise<string> {
   if (!orgContent) return "";
 
   const highlighter = await getHighlighter();
-  const result = await orgProcessor(highlighter, [rehypeSizedImages]).process(orgContent);
+  const result = await orgProcessor(highlighter, [rehypeSizedImages, rehypeTemml]).process(
+    orgContent,
+  );
   return result.toString();
 }
 
