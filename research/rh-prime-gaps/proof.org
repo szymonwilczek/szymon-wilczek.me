@@ -1,0 +1,283 @@
+#+TITLE: An explicit prime gap constant under RH: the full proof
+#+OPTIONS: ^:{} toc:nil num:nil
+
+Companion to [[https://szymon-wilczek.me/writings/a-prime-in-every-gap][A Prime in Every Gap]].
+Numbers come from ~code/explicit_constant.py~ (Arb, the result), ~code/certify.py~ (root isolation),
+~code/lemma_psi.py~ (the digamma lemmas) and ~code/verify_explicit_mp.py~ (independent recomputation of the norms).
+The Lean 4 formalisation is in ~RhGaps/~.
+
+* Theorem
+
+#+begin_quote
+*Theorem.* Assume the Riemann Hypothesis. For every \(x \ge 4\) the interval
+\([x,\; x + c^*\sqrt x\log x]\) contains a prime, where \(c^* = 0.8511525827\)
+(\(= 1/J^*\) rounded up, \(J^* \ge 1.17487747839\)). Previously: \(22/25\) [CMS, Thm. 5].
+#+end_quote
+
+RH is used as a black box: only the statement that all non-trivial zeros of \(\zeta\) lie on \(\mathrm{Re}\,s = \tfrac12\).
+
+Test function: \(F(y) = \sum_{j=1}^{30} c_j e^{-\pi b_j y^2}\), with coefficients the exact dyadic rationals in
+~results/cand_A4.0000_m30_0.15_20.0.txt~. \(\widehat F(t) = \sum c_j b_j^{-1/2} e^{-\pi t^2/b_j}\),
+\(G := (\widehat F)_+\), \(b_{\max} = 20\).
+
+*Norms* (Arb, ↑ = upper bound; independent mpmath value in brackets):
+
+| symbol                | definition                                                                     | value                                                   |
+|-----------------------+--------------------------------------------------------------------------------+---------------------------------------------------------|
+| \(F(0)\)              | \(\sum c_j\)                                                                   | \(1.280406782\) (exact)                                 |
+| \(\Vert F\Vert_1\) ↑  |                                                                                | \(0.9999848609\) (\(0.999984861\))                      |
+| \(T_+\) ↑             | \(\int_{\lvert t\rvert>1} G\)                                                  | \(0.02638677008\) (\(0.02638677008\))                   |
+| \(T_M\) ↑             | \(\int_{\lvert t\rvert>15}\lvert\widehat F\rvert\)                             | \(9.3\cdot10^{-18}\)                                    |
+| \(\mathrm{TV}\) ↑     | \(\int_1^\infty \lvert\widehat F'\rvert\)                                      | \(0.1614885545\) (\(0.1614885545\))                     |
+| \(\Vert F'\Vert_1\) ↑ |                                                                                | \(3.082583984\) (\(3.082583984\))                       |
+| \(\Lambda_F\) ↑       | \(2\int_1^\infty (y-1)\lvert F\rvert \ge \Vert \log^+\lvert y\rvert F\Vert_1\) | \(0.01023\) (exact \(\Vert \log^+ F\Vert_1 = 0.00807\)) |
+| \(\sigma\) ↑          | \(\sup\lvert\widehat F\rvert\)                                                 | \(2.754\) (exact \(0.884\))                             |
+| \(\Sigma_0\)          | \(\sum\lvert c_j\rvert \ge \Vert F\Vert_\infty\)                               | \(392119.16\)                                           |
+| \(S\)                 | \(\sum\lvert c_j\rvert b_j^{-1/2}\)                                            | \(461371.77\)                                           |
+
+Notes: \(S \ge \Vert \widehat F\Vert_\infty\) and \(S = \sum|c_j|\,2\pi b_j\int y^2 e^{-\pi b_j y^2} \ge \Vert yF'\Vert_1\);
+\(|\widehat F(t)| \le S e^{-\pi t^2/b_{\max}}\).
+
+-----
+
+* 1. Auxiliary lemmas
+
+*(L1)* \(|\mathrm{Re}\,\psi(\tfrac14+it)| \le 4.3 + \log(1+4|t|)\).
+
+/Proof./ \(\mathrm{Re}\,\psi(\tfrac14+it) = \psi(\tfrac14) + \Sigma(t)\), \(\Sigma(t) = \sum_{n\ge0}\frac{t^2}{v_n(v_n^2+t^2)}\),
+\(v_n = n+\tfrac14\) (from \(\psi(z) = -\gamma + \sum_n(\frac1{n+1} - \frac1{n+z})\)). \(\psi(\tfrac14) = -\gamma-\tfrac\pi2-3\log2 = -4.2274\ldots\)
+Each term is \(\le \min(1/v_n,\ t^2/v_n^3)\). For \(T = |t| < \tfrac14\): \(\Sigma \le T^2\zeta(3,\tfrac14) \le 64.7/16 < 4.05\).
+For \(T\ge\tfrac14\): \(\sum_{v_n\le T}1/v_n \le 4 + \int_{1/4}^T dv/v = 4+\log 4T\); the first term with \(v_n > T\)
+is \(\le 1/T \le 4\); the rest are \(\le \int_T^\infty T^2v^{-3}dv = \tfrac12\). So \(0 \le \Sigma \le 8.5 + \log(1+4T)\)
+and \(\mathrm{Re}\,\psi \in [-4.23,\ 4.28 + \log(1+4T)]\). ∎
+Interval check (~lemma_psi.py~, \(t\in[0,200]\), 200 000 balls): margin \(\ge 0.07\).
+
+*(L2)* \(|\psi'(\tfrac14+it)| \le \min\big(17.2,\ t^{-2} + \tfrac{\pi}{2|t|}\big)\).
+
+/Proof./ \(|\psi'(z)| = |\sum_n (n+z)^{-2}| \le \sum_n (v_n^2+t^2)^{-1}\). This is \(\le \sum v_n^{-2} = \psi'(\tfrac14) = \pi^2 + 8G = 17.197\ldots\)
+and, the summand being decreasing in \(v\), \(\le \frac1{v_0^2+t^2} + \int_0^\infty\frac{dv}{v^2+t^2} \le t^{-2} + \frac{\pi}{2|t|}\). ∎
+Interval check: margin \(\ge 0.0027\) (equality in the limit \(t\to0\) for the constant \(\psi'(1/4)\), hence 17.2).
+
+Let \(g(u) := \mathrm{Re}\,\psi(\tfrac14 + \tfrac{iu}2)\). Then \(|g(u)| \le 4.3 + \log(1+2|u|)\) and
+\(|g'(u)| \le \tfrac12\min(17.2,\ 4u^{-2} + \pi/|u|)\).
+
+*(MV)* [Montgomery–Vaughan 1973, Thm. 2] \(\pi(u+y) - \pi(u) < 2y/\log y\) for \(u, y > 1\).
+
+*(T)* [Trudgian; CMS Lemma 9] \(|N(T) - \frac T{2\pi}\log\frac T{2\pi e} - \frac78| \le 0.15\log T + 3\) for \(T\ge e\).
+
+*(OeS)* [Oliveira e Silva–Herzog–Pardi 2014] \(p_{n+1} - p_n < \log^2 p_n\) for \(11 \le p_n \le 4\cdot10^{18}\).
+
+*(TV)* If \(I_1, I_2, \ldots\) are consecutive adjacent intervals in \([1,\infty)\), then
+\(\sup_{I_j}G \le \frac1{|I_j|}\int_{I_j}G + \mathrm{osc}_{I_j}G\) and \(\sum_j\mathrm{osc}_{I_j}G \le \mathrm{TV}_{[1,\infty)}(G) \le \mathrm{TV}\)
+(\(s\mapsto s_+\) is 1-Lipschitz). ∎
+
+* 2. Small \(x\): \(4 \le x < 4\cdot10^{18}\)
+
+For \(x\in[p_n, p_{n+1})\) with \(p_n \ge 11\): \(p_{n+1} < p_n + \log^2 p_n \le x + \log^2 x \le x + c^*\sqrt x\log x\),
+because \(\log x/\sqrt x \le 2/e < 0.736 < c^*\). For \(x\in[4,5)\), \([5,7)\), \([7,11)\) the worst case is \(x = p_n\):
+\(4 + c^*\cdot 2\log 4 = 6.36 \ge 5\), \(5 + c^*\sqrt5\log5 = 8.06 \ge 7\), \(7 + c^*\sqrt7\log 7 = 11.38 \ge 11\). ✓
+(Also, a sieve up to \(10^8\) gives \(\max (p_{n+1}-p_n)/(\sqrt{p_n}\log p_n) = 0.777\), at \(p_n = 7\).)
+
+* 3. Large \(x \ge x_0 = 4\cdot10^{18}\)
+
+Let \(c := c^* \in [\tfrac12, 1]\) and \(L := \log x \ge L_0 = 42.83\). Suppose *there is no prime in \([x, x+c\sqrt xL]\)*.
+Set \(a e^{-2\pi\Delta} = x\), \(a e^{2\pi\Delta} = x' := x + c\sqrt xL\), i.e.
+\(4\pi\Delta = \log(1+cL/\sqrt x)\), \(a = \sqrt{xx'}\). Then
+\(\Delta \le D := L/(4\pi\sqrt x)\) \((<1.8\cdot10^{-9})\) and \(x \le a \le a_{\max} := x\sqrt{1+L/\sqrt x}\).
+Put \(f(z) := \Delta F(\Delta z)\), \(h(z) := f(z)a^{iz}\), \(\tau(n) := \frac{\log(n/a)}{2\pi\Delta}\), \(Y := 2\pi\Delta\sqrt a\).
+
+** 3.1 The explicit formula
+
+\(h\) is entire, and in the strip \(|\mathrm{Im}\,z| \le 1\): \(|h(u+iv)| \le \Delta\Sigma_0 e^{\pi b_{\max}\Delta^2}a\,e^{-\pi b_1\Delta^2u^2}\)
+(\(b_1 = \min b_j\)). This Gaussian decay meets the hypotheses of CMS Lemma 6 (= Montgomery–Vaughan, /Multiplicative Number Theory I/,
+Thm. 5.12: analytic in \(|\mathrm{Im}\,s| \le \tfrac12+\varepsilon\), \(|h(s)| \ll (1+|s|)^{-1-\delta}\)).
+Lemma 6 does *not* require \(h\) to be real on \(\mathbb R\); CMS apply it to the same \(h = f a^{iz}\) in their §5 (the asymptotic version).
+Their explicit proof (§6) uses a different kernel (Lemma 7), so the terms \(E_\Gamma\) and \(E_\pi\) below have no counterpart in the
+explicit CMS proof; they are new (in CMS §5 they are only \(O(1)\)).
+
+\(\widehat h(\xi) = \widehat F\big((\xi - \frac{\log a}{2\pi})/\Delta\big)\). Under RH, \(h(\gamma) = f(\gamma)a^{i\gamma}\) and \(|h(\gamma)| = |f(\gamma)|\).
+Taking real parts, bounding \(\widehat F \le G\) against the weights \(\Lambda(n)/\sqrt n \ge 0\), and multiplying by \(2\pi\):
+
+\[2\pi f(\tfrac i2)(a^{1/2}+a^{-1/2}) \le \underbrace{2\pi\sum_\gamma|f(\gamma)|}_{Z} + \underbrace{\log\pi\,\big|\widehat F(-\tfrac{\log a}{2\pi\Delta})\big|}_{E_\pi}
++ \underbrace{\Big|\int h(u)g(u)\,du\Big|}_{E_\Gamma} + \underbrace{\sum_{n\ge2}\frac{\Lambda(n)}{\sqrt n}\Big[G(\tau(n)) + G\big(-\tfrac{\log na}{2\pi\Delta}\big)\Big]}_{P}.\]
+
+Dropping \(a^{-1/2}f(\tfrac i2)\) on the left is allowed, since \(f(\tfrac i2) > 0\).
+
+** 3.2 Left-hand side
+
+\(f(\tfrac i2) = \Delta\sum c_j e^{\pi b_j\Delta^2/4}\); \(|e^s - 1| \le 2s\) for \(0\le s\le\tfrac12\), so
+\(f(\tfrac i2) \ge \Delta(F(0) - \tfrac\pi2\Delta^2\sum|c_j|b_j) = \Delta F(0)(1-\varepsilon_1)\) with \(\varepsilon_1 := \frac{\pi D^2\sum|c_j|b_j}{2F(0)}\).
+LHS \(\ge Y F(0)(1-\varepsilon_1)\).
+
+** 3.3 Zeros: \(Z\)
+
+As in CMS §6.1 (partial summation with (T), \(|{\,|f|'}| \le |f'|\) a.e.; this works for any \(F\), with no assumption on its sign),
+using \(\log\frac{y}{2\pi\Delta} \le \log^+ y + \log\frac1{2\pi\Delta}\) and \(\log\frac y\Delta \le \log^+y + \log\frac1\Delta\):
+
+\[Z \le \log\tfrac1{2\pi\Delta}\Vert F\Vert_1 + \Lambda_F + E_Z,\qquad E_Z := 2\pi\big[0.15 D S + (0.15 D\log\tfrac1D + 3D)\Vert F'\Vert_1\big]\]
+
+(\(\Delta\log\frac1\Delta\) is increasing for \(\Delta < 1/e\), so \(D\) may be substituted).
+
+** 3.4 The Gamma term: \(E_\Gamma\)
+
+\(\int h g = \int F(y)\varphi(y)e^{i\Lambda y}dy\) with \(\varphi(y) := g(y/\Delta)\), \(\Lambda := \log a/\Delta\). Integrating by parts
+(boundary terms vanish: \(F\) is Gaussian, \(\varphi\) grows logarithmically):
+\(|\int| \le \Lambda^{-1}(\Vert F'\varphi\Vert_1 + \Vert F\varphi'\Vert_1)\), \(\Lambda^{-1} \le \Delta/L\).
+
+- \(\Vert F'\varphi\Vert_1 \le \int|F'|(4.3 + \log\frac1\Delta + \log(\Delta + 2|y|)) \le (4.3 + \log\frac1\Delta)\Vert F'\Vert_1 + 2S\)
+  (since \(\log(\Delta+2|y|) \le \log(1+2|y|) \le 2|y|\)).
+- \(\Vert F\varphi'\Vert_1\): \(\varphi'(y) = g'(y/\Delta)/\Delta\). For \(|y|\le1\): \(\le \Sigma_0\int_{|u|\le1/\Delta}|g'| \le \Sigma_0(17.2 + 4 + \pi\log\frac1\Delta)\).
+  For \(|y|>1\): \(|g'(y/\Delta)|/\Delta \le 2\Delta/y^2 + \frac\pi{2|y|} \le 2\Delta + \frac\pi2\), giving \(\le (\frac\pi2 + 2\Delta)\Vert F\Vert_1\).
+
+\[E_\Gamma \le \tfrac DL\Big[(21.2 + \pi\log\tfrac1D)\Sigma_0 + (\tfrac\pi2 + 2D)\Vert F\Vert_1 + (4.3 + \log\tfrac1D)\Vert F'\Vert_1 + 2S\Big].\]
+
+** 3.5 The sum over \(n\): \(P\)
+
+Split \(n\ge2\) into: (a) primes with \(|\log(p/a)|\le1\); (b) prime powers \(p^k\), \(k\ge2\), with \(|\log(n/a)|\le1\);
+(c) \(|\log(n/a)| > 1\); (d) the second term \(G(-\log(na)/2\pi\Delta)\).
+
+*(a) Primes.* By assumption there is no \(p\) with \(|\tau(p)| \le 1\) (\(\tau(x) = -1\), \(\tau(x') = 1\)).
+This step is the main new element compared with CMS.
+
+/Upwards:/ \(x_0 := x'\), \(x_{j+1} := x_j + \sqrt{x_j}\), until \(x_j > ae\). By (MV) with \(u = x_j\), \(y = \sqrt{x_j}\), the interval \((x_j, x_{j+1}]\)
+holds fewer than \(4\sqrt{x_j}/\log x_j\) primes, each with weight \(\log p/\sqrt p \le \log x_j/\sqrt{x_j}\). So each link contributes \(\le 4\sup_{I_j}G\),
+\(I_j := [\tau(x_j), \tau(x_{j+1})]\) (adjacent, \(\bigcup I_j \subset [1,\infty)\)), \(|I_j| = \frac{\log(1+x_j^{-1/2})}{2\pi\Delta}\).
+From \(\log(1+s) \ge s/(1+s)\): \(|I_j|^{-1} \le 2\pi\Delta(\sqrt{x_j}+1) = Y e^{\pi\Delta\tau(x_j)}(1 + x_j^{-1/2})\).
+Hence \(|I_j|^{-1} \le Y(1+\eta)\) when \(\tau(x_j) \le M := 15\), and \(\le Y\sqrt e(1 + x^{-1/2})\) always (\(x_j \le ae\)), where
+\(\eta := e^{\pi D(M+2)}(1 + x^{-1/2}) - 1\). By (TV), splitting the links into \(\tau(x_j)\le M\) and \(>M\) (disjoint sums,
+the second inside \((M,\infty)\)):
+\[\textstyle\sum \le 4Y(1+\eta)\int_1^\infty G + 4Y(\sqrt e - 1)(1+\eta)\int_M^\infty|\widehat F| + 4\,\mathrm{TV}.\]
+
+/Downwards:/ \(u_0 := x\), \(u_{j+1} + \sqrt{u_{j+1}} = u_j\), until \(u_j < a/e\). (MV) on \((u_{j+1}, u_j]\) (\(x\) itself is not prime)
+gives a contribution \(\le 4\sup G\) on \([\tau(u_{j+1}), \tau(u_j)] \subset (-\infty,-1]\), with \(|I|^{-1} \le 2\pi\Delta(\sqrt{u}+1) \le Y(1+x^{-1/2})\).
+The same inequality follows on the negative side (\(\widehat F\) is even).
+
+Together: \((a) \le 4Y(1+\eta)T_+ + 4Y(\sqrt e-1)(1+\eta)T_M + 8\,\mathrm{TV}\).
+
+/For the CMS function (\(\widehat F\) decreasing on \([1,\infty)\)) \(\mathrm{TV} = \widehat F(1)\), which recovers their \(8\widehat F(1)\)./
+
+*(b) Prime powers, \(k\ge2\).* Let \(M' = M'(L) := \sqrt{b_{\max}(2\log L + 25)/\pi}\) (\(=14.39\) at \(L_0\)),
+\(\theta := 2\pi DM'\), \(U := xe^{-\theta}\), \(V := a_{\max}e^\theta\).
+- \(|\tau(n)| \le M'\) (\(n\in[U,V]\)): weight \(\log p/\sqrt n \le \log V/(2\sqrt U)\); the number of \(k\)-th powers in \([U,V]\) is
+  \(\le 1 + V^{1/k} - U^{1/k} \le 1 + \frac{V-U}{2\sqrt U}\), with \(k \le k_{\max} := \log V/\log 2\). Exactly,
+  \(V - U = a_{\max}e^{\theta} - xe^{-\theta} = x\big[(\sqrt{1+r}-1)e^\theta + 2\sinh\theta\big]\), \(r := L/\sqrt x\), so
+  \[PP_{\rm in} := \sigma\,\frac{\log V}{2\sqrt U}\,k_{\max}\Big(1 + \frac{V-U}{2\sqrt U}\Big).\]
+- \(|\tau(n)| > M'\), \(|\log(n/a)|\le1\): \(G \le Se^{-\pi M'^2/b_{\max}} = Se^{-25}L^{-2}\); weight \(\le \frac{\log(ea)}{2\sqrt{a/e}}\);
+  the number of powers \(k\ge2\) up to \(ea\) is \(\le \sqrt{ea} + \frac{\log(ea)}{\log2}(ea)^{1/3}\):
+  \[PP_{\rm out} := Se^{-\pi M'^2/b_{\max}}\frac{\log(ea_{\max})}{2\sqrt{x/e}}\Big(\sqrt{ea_{\max}} + \tfrac{\log(ea_{\max})}{\log2}(ea_{\max})^{1/3}\Big).\]
+
+*(c)+(d)+\(E_\pi\): tails.* \(\kappa := 1/(4\pi D^2b_{\max})\) \((\approx 1.4\cdot10^{15})\). For \(|\log(n/a)|\ge1\):
+\(\pi\tau^2/b_{\max} = \frac{(\log(n/a))^2}{4\pi\Delta^2b_{\max}} \ge \kappa(\log\frac na)^2 \ge \kappa|\log\frac na|\) (as \(\Delta\le D\)), so \(G(\tau(n)) \le S\min(n/a, a/n)^\kappa\).
+- \(n > ae\): let \(n_0 := \lceil ae\rceil\). From \(\log n \le n\): \(\sum_{n\ge n_0}\log n\,(a/n)^\kappa \le a^\kappa\sum_{n\ge n_0} n^{1-\kappa}
+  \le n_0(a/n_0)^\kappa(1 + \frac{n_0}{\kappa-2}) \le n_0e^{-\kappa}(1 + \frac{n_0}{\kappa-2})\). The last expression increases with \(n_0\), so
+  any \(N \ge n_0\) may be substituted; we take \(N := ea_{\max}+1\) (no \(n\) is skipped).
+- \(n < a/e\): \(\le e^{-\kappa}\sum_{n\le a}\log n \le e^{-\kappa}a\log a\).
+- (d): \(|\log(na)| \ge \log(2a) \ge 1\), so \(G \le S(na)^{-\kappa}\) and the sum is \(\le 2Sa^{-\kappa} \le 2Se^{-\kappa}\).
+- \(E_\pi \le \log\pi\cdot S e^{-\kappa(\log a)^2} \le \log\pi\cdot Se^{-\kappa}\).
+
+\[E_{\rm far} := Se^{-\kappa}\big(N(1 + \tfrac{N}{\kappa-2}) + a_{\max}\log a_{\max} + 2 + \log\pi\big) \quad(\approx 10^{-6\cdot10^{14}}).\]
+
+** 3.6 Conclusion
+
+Collecting: \(Y\big[F(0)(1-\varepsilon_1) - 4(1+\eta)T_+ - 4(\sqrt e-1)(1+\eta)T_M\big] \le \log\frac1{2\pi\Delta}\Vert F\Vert_1 + K\),
+\[K := \Lambda_F + 8\,\mathrm{TV} + E_Z + E_\Gamma + PP_{\rm in} + PP_{\rm out} + E_{\rm far}.\]
+Replacing \(\Vert F\Vert_1\) by an upper bound \(\bar L_1\) (allowed, since \(\log\frac1{2\pi\Delta} > 0\)) and dividing:
+\(Y J^* \le \log\frac1{2\pi\Delta} + K/\bar L_1\) with \(J^* := [\ldots]/\bar L_1\).
+By CMS §6.3 (for \(c\in[\frac12,1]\), \(x\ge x_0\)): \(Y \ge \frac c2L - 0.001\) and \(\log\frac1{2\pi\Delta} \le \frac L2 - 2\).
+Checked directly: \(Y \ge \frac{cL}2 - \frac{L^2}{4\sqrt x}\) with \(\frac{L_0^2}{4\sqrt{x_0}} = 2.3\cdot10^{-7}\), and
+\(2\pi\Delta = \frac12\log(1+\frac{cL}{\sqrt x}) \ge \frac{L}{4\sqrt x}(1-\frac{L}{2\sqrt x})\), so \(\log\frac1{2\pi\Delta} \le \frac L2 + \log4 - \log L_0 + 10^{-8} \le \frac L2 - 2.37\).
+Since \(cJ^* \ge 1\): \(\frac L2 - 0.001J^* \le \frac L2 - 2 + K/\bar L_1\), which is *a contradiction as long as \(K/\bar L_1 < 2 - 0.001J^*\).*
+
+* 4. All \(x \ge x_0\)
+
+The condition from section 3.6 is checked for *every* \(L \ge L_0\), not only at \(x_0\).
+
+** 4.1 \(L \in [L_0, 1000]\): covering by balls
+
+The range is covered by 19 144 Arb balls of width \(0.05\). ~x_terms~ in ~explicit_constant.py~ evaluates every term of §3 with \(L\) as a ball,
+so the output bounds them *simultaneously for every \(L\) in the ball* (the formulas are written without subtracting close numbers,
+e.g. \(V-U\) as in §3.5(b) and \(\log a_{\max} = L + \frac12\log(1+r)\)). Taking the maximum over the balls:
+\(\varepsilon_1 \le 1.389\cdot10^{-12}\), \(\eta \le 9.163\cdot10^{-8}\), \(E_Z + E_\Gamma + PP_{\rm in} + PP_{\rm out} + E_{\rm far} \le 0.0027020\).
+\(J^*\) is computed from these maxima.
+
+** 4.2 \(L \ge 1000\): crude decreasing bounds
+
+For \(L \ge 1000\): \(r \le 10^{-200}\), \(2\pi D \le \frac L2 e^{-L/2}\), \(\log\frac1D = \frac L2 + \log\frac{4\pi}{L} \le \frac L2\), \(a_{\max}\le 2x\),
+\(M' \le L\), \(\theta \le \frac{L^2}2e^{-L/2}\) (so \(e^\theta, e^{\theta/2} \le 2\) and \(\sinh\theta \le 2\theta\)). Hence:
+- \(E_Z \le \frac L2e^{-L/2}\big[0.15S + (0.075L + 3)\Vert F'\Vert_1\big]\),
+- \(E_\Gamma \le \frac{e^{-L/2}}{4\pi}\big[(21.2 + \frac{\pi L}2)\Sigma_0 + (\frac\pi2+1)\Vert F\Vert_1 + (4.3 + \frac L2)\Vert F'\Vert_1 + 2S\big]\),
+- \(PP_{\rm in} \le 1.5\,\sigma(L+1)^2(1 + L + 2L^2)e^{-L/2}\) (from \(\log V \le L+1\), \(\sqrt U \ge \sqrt x/2\), \(k_{\max} \le 1.5(L+1)\),
+  \(\frac{V-U}{2\sqrt U} \le \sqrt x(r + 4\theta) \le L + 2L^2\)),
+- \(PP_{\rm out} \le Se^{-25}\frac{L+2}{L^2}\cdot\frac{\sqrt e}2(\sqrt{2e} + 1)\),
+- \(E_{\rm far} \le 200\,S\,\exp\big(3L - \frac{e^L}{2L^2}\big)\) (from \(\kappa = \frac{\pi}{5}\frac{e^L}{L^2} \ge \frac{e^L}{2L^2}\), \(N \le 6e^L\)).
+
+Each has the form \(P(L)e^{-L/2}\) with a polynomial \(P\) of degree \(\le 4\) with non-negative coefficients (decreasing for \(L > 8\), since
+\(P'/P \le 4/L\)), or \(C(L+2)/L^2\), or \(C e^{3L - e^L/2L^2}\); all decrease for \(L \ge 1000\). Their sum at \(L = 1000\) is
+\(\le 1.77\cdot10^{-8}\). \(\varepsilon_1\) and \(\eta\) are increasing functions of \(D\) and \(1/\sqrt x\), which decrease for \(L>2\), so they are
+\(\le\) their values at \(L = 1000\), which are below the maxima of §4.1. (The code also checks that the crude bounds dominate the exact
+terms at several points \(L \in [10^3, 10^5]\).)
+
+* 5. Numbers (~explicit_constant.py~, Arb, 256 bits)
+
+|                    | at \(x_0\)                        | max over \(x \ge x_0\)                  |
+|--------------------+-----------------------------------+-----------------------------------------|
+| \(\varepsilon_1\)  | \(1.386\cdot10^{-12}\)            | \(1.389\cdot10^{-12}\)                  |
+| \(\eta\)           | \(9.152\cdot10^{-8}\)             | \(9.163\cdot10^{-8}\)                   |
+| \(E_Z\)            | \(0.000741\)                      |                                         |
+| \(E_\Gamma\)       | \(0.001357\)                      |                                         |
+| \(PP_{\rm in}\)    | \(0.000583\)                      |                                         |
+| \(PP_{\rm out}\)   | \(2.2\cdot10^{-7}\)               |                                         |
+| \(E_{\rm far}\)    | \(\approx 10^{-5.9\cdot10^{14}}\) |                                         |
+| sum of small terms | \(0.002681\)                      | \(0.0027020\)                           |
+| \(8\,\mathrm{TV}\) | \(1.29191\)                       |                                         |
+| \(\Lambda_F\)      | \(0.01023\)                       |                                         |
+| *\(J^*\)*            |                                   | \(\ge 1.17487747839\)                   |
+| *\(K/\bar L_1\)*     |                                   | \(\le 1.30487\) (need \(< 1.99883\)) ✅ |
+| *\(c^* = 1/J^*\)*    |                                   | \(\le 0.851152583\)                     |
+
+* 6. External inputs
+
+RH (as a hypothesis); Guinand–Weil (MV Thm. 5.12); Montgomery–Vaughan's Brun–Titchmarsh; Trudgian's \(N(T)\) (via CMS Lemma 9);
+Oliveira e Silva–Herzog–Pardi; the two inequalities of CMS §6.3 (rechecked in §3.6 above).
+
+* 7. Lean formalisation
+
+~RhGaps.main (hRH : RiemannHypothesis) (x : ℝ) (hx : 4 ≤ x) : ∃ p : ℕ, p.Prime ∧ x ≤ p ∧ (p : ℝ) ≤ x + cstar * √x * log x~,
+with ~cstar = 8511525827 / 10^10~ and ~RiemannHypothesis~ taken from Mathlib. It builds with no ~sorry~.
+~#print axioms RhGaps.main~ lists, besides the standard ~propext~, ~Classical.choice~ and ~Quot.sound~:
+
+| axiom                 | statement                                                                                                                                                                        | source                                         |
+|-----------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------|
+| ~oliveira_e_silva~      | (OeS)                                                                                                                                                                            | computer search, 2014                          |
+| ~montgomery_vaughan~    | (MV)                                                                                                                                                                             | Montgomery–Vaughan 1973                        |
+| ~explicit_formula_core~ | under RH and with no prime in the gap: \(2\pi\Delta(\sqrt a + 1/\sqrt a)\,f(2\pi\Delta^2/16\pi) \le \ell\Vert F\Vert_1 + \Vert \log^+\!\cdot F\Vert_1 + E_{\rm sm} + P_+ + P_-\) | §3.1–§3.4, §3.5(b)–(d), §4                     |
+| ~cert_L1~               | \(\Vert F\Vert_1 \le 0.999984860856146\)                                                                                                                                         | Arb                                            |
+| ~cert_logF~             | \(\Vert \log^+\lvert y\rvert\,F\Vert_1 \le 0.0102305235484304\)                                                                                                                  | Arb (computed as \(2\int(y-1)\lvert F\rvert\)) |
+| ~cert_Tplus~            | \(\int_1^t \widehat F_+ \le 0.0131933850413233\)                                                                                                                                 | Arb                                            |
+| ~cert_TM~               | \(\int_{15}^t \lvert\widehat F\rvert \le 5\cdot10^{-18}\)                                                                                                                        | Arb                                            |
+| ~cert_TV~               | \(\mathrm{Var}(\widehat F; [1,\infty)) \le 0.161488554532486\)                                                                                                                   | Arb                                            |
+
+\(P_+\) and \(P_-\) are concrete sums over ~Nat.Prime~ of a concrete \(\widehat F\) built from the coefficients in ~Coeffs.lean~, so the core
+axiom does not hide §3.5(a). Proved in Lean: all of §2 apart from (OeS), the §3.6 parameter algebra and the CMS §6.3 inequalities,
+the lower bound of §3.2 with the exact thirty rational coefficients, both chains of §3.5(a) (upwards and downwards, with the (TV)
+bookkeeping), and the final assembly, where ~nlinarith~ checks the inequalities on exact rationals.
+The Arb certificates are not rechecked in Lean; they are five explicit numbers that any interval-arithmetic package can verify.
+
+* 8. Checking it yourself
+
+#+begin_src sh
+  pip install -r code/requirements.txt
+  python code/certify.py results/cand_A4.0000_m30_0.15_20.0.npy 4          # J ≥ 1.17487748806
+  python code/explicit_constant.py results/cand_A4.0000_m30_0.15_20.0.npy   # c* ≤ 0.851152583
+  python code/verify_explicit_mp.py results/cand_A4.0000_m30_0.15_20.0.npy  # independent norms
+  python code/lemma_psi.py                                                  # (L1), (L2)
+  python code/reproduce.py                                                  # known CMS values
+
+  cd RhGaps
+  lake exe cache get
+  lake build
+  lake env lean RhGaps/Audit.lean    # #print axioms
+#+end_src
+
+~results/cand_A3.2727_m25_0.2_15.0.*~ is the function behind the asymptotic constant \(0.834025\)
+(\(J \ge 1.19900564740\) at \(A = 36/11\)): ~python code/certify.py results/cand_A3.2727_m25_0.2_15.0.npy 36/11~.
