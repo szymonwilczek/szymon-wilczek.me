@@ -1,7 +1,7 @@
 #+TITLE: Screenshots of au-themes for GNU Emacs
 #+AUTHOR: Szymon Wilczek
 #+DATE: <2026-10-17 Sat>
-#+UPDATED: <2026-10-31 Sat>
+#+UPDATED: <2026-11-23 Mon>
 #+CATEGORY: Emacs
 #+TAGS: emacs themes accessibility
 #+DESCRIPTION: Every au-theme in Emacs Lisp, C, Magit, Dired and Org, as it looks in my own Emacs.
@@ -19,11 +19,10 @@ Emacs, made first of all for autistic people and for anyone who finds most
 themes too loud to read for long. Code and the test suite live at [[https://github.com/szymonwilczek/au-themes][szymonwilczek/au-themes]]
 
 The screenshots below show the themes as they are on the =main= branch today
-(31.10.2026). They are taken in my everyday Emacs, not in a clean one: the font
-is Typus Mono 92 (the story is in [[/writings/the-8-pixel-obsession-typus-mono][8-Pixel Obsession]]), the tabs come
-from [[https://github.com/szymonwilczek/bufferline.el][bufferline.el]], and the mode line, Evil and the completion stack
-are my own setup. So this is what the themes look like in real use, not
-in a demo.
+(23.11.2026). They are taken in my everyday Emacs, not in a clean one: the font
+is Typus Mono 92 (the story is in [[/writings/the-8-pixel-obsession-typus-mono][8-Pixel Obsession]]), and the mode
+line, Evil and the completion stack are my own setup. So this is what the
+themes look like in real use, not in a demo.
 
 Each theme gets four pictures:
 
