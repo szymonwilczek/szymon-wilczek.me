@@ -13,11 +13,13 @@ ORIGINS = "https://szymon-wilczek.me,http://localhost:4321"
 # the bytes, one value a file under its five letters
 [[kv_namespaces]]
 binding = "BYTES"
+id = "19eda9bd03834ed58edc336b10e257ef"
 
 # folders, names, pins, sizes and dates
 [[d1_databases]]
 binding = "DB"
 database_name = "pub"
+database_id = "757b6966-29c6-46e9-87e5-ce7ecb8c19d9"
 
 # uploads and new folders, per address
 [[ratelimits]]
