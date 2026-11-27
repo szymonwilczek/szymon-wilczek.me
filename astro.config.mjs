@@ -39,6 +39,7 @@ const contentSecurityPolicy = (hashes) =>
     `script-src 'self' ${hashes.join(" ")} https://static.cloudflareinsights.com`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
+    "media-src 'self' https://pub.szymon-wilczek.me",
     "connect-src 'self' https://*.szymon-wilczek.me https://cloudflareinsights.com",
     "object-src 'none'",
     "base-uri 'self'",
@@ -143,6 +144,7 @@ export default defineConfig({
       filter: (page) =>
         !page.includes("/vault") &&
         !page.includes("/send") &&
+        !page.includes("/pub") &&
         !page.includes("/404") &&
         !page.endsWith(".org") &&
         !page.endsWith(".asc"),
