@@ -56,7 +56,7 @@ npx wrangler secret put PUB_WORD         # the password for /pub/ and /~/
 npx wrangler deploy
 ```
 
-`deploy` makes `pub.website.com` the Worker's custom domain (the zone has
+`deploy` makes `pub.szymon-wilczek.me` the Worker's custom domain (the zone has
 to be on the same Cloudflare account).
 
 The password is only ever a Worker secret: it is never in the repository
