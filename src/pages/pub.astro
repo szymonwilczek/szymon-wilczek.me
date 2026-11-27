@@ -1,0 +1,1295 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Divider from "../components/Divider.astro";
+import { ID_LENGTH, PUB_URL, STORE_BYTES, bytes, roundBytes } from "../utils/pub";
+import { ARROW, BOX, DROP, KEY, TICK, TRACK, TRACK_LENGTH } from "../utils/send-ink";
+import { BLOT, FOLDER, PIN, RING } from "../utils/pub-ink";
+
+const DECKLE =
+  "M8 10 L120 4 L260 9 L410 3 L560 8 L700 2 L850 7 L992 4 L996 160 L990 330 L997 500 L991 680 L996 840 L993 994 L840 990 L690 996 L540 991 L380 997 L230 992 L90 996 L6 991 L9 820 L3 650 L8 480 L2 300 L7 140 Z";
+const PAGE_SHADOW_OFFSET = "translate(5 9)";
+const UNKNOWN_ID = "·".repeat(ID_LENGTH);
+const TRACK_HEIGHT = 26;
+const host = PUB_URL.replace(/^https?:\/\//, "");
+---
+
+<BaseLayout title="Pub" description="Files that stay up at pub.szymon-wilczek.me." noindex={true}>
+  <header class="pub-head">
+    <p class="crumb">pub · 公</p>
+    <h1>Pub</h1>
+    <p class="lede">Files that stay up at {host}.</p>
+  </header>
+
+  <Divider from={600} to={840} />
+
+  <form class="sheet" data-unlock>
+    <p class="hand note-line">
+      only I put things up here · the password first, then the shelf opens
+    </p>
+    <div class="unlock-row">
+      <label class="word">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d={KEY}></path>
+        </svg>
+        <span class="hand">password</span>
+        <input type="password" name="password" autocomplete="current-password" required data-word />
+      </label>
+      <button class="send hand" data-unlock-button>
+        open the shelf
+        <svg viewBox="0 0 26 16" aria-hidden="true">
+          <path d={ARROW}></path>
+        </svg>
+      </button>
+    </div>
+    <p class="error" role="alert" data-unlock-error hidden></p>
+    <p class="count-line">
+      <span data-count>
+        up there now · {bytes(0)} of {roundBytes(STORE_BYTES)}
+      </span>
+      <a href={`${PUB_URL}/`}>{host} ↗</a>
+    </p>
+  </form>
+
+  <form class="sheet" data-form hidden>
+    <fieldset class="fields" data-fields>
+      <legend class="quiet">What goes up, and where</legend>
+
+      <section aria-label="Where it goes">
+        <p class="part-head">
+          <span class="hand">where</span>
+          <span class="into">
+            into <span data-into>/</span>
+          </span>
+        </p>
+        <div class="page">
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+            <path d={DECKLE} class="page-shadow" transform={PAGE_SHADOW_OFFSET}></path>
+            <path d={DECKLE} class="page-sheet"></path>
+          </svg>
+          <ul class="tree" data-tree></ul>
+          <label class="new-folder">
+            <span class="hand plus" aria-hidden="true">
+              +
+            </span>
+            <span class="hand">
+              new folder in <span data-new-in>/</span>
+            </span>
+            <input
+              type="text"
+              placeholder="a name, then enter"
+              enterkeyhint="done"
+              autocomplete="off"
+              spellcheck="false"
+              data-new-name
+            />
+          </label>
+        </div>
+      </section>
+
+      <section class="tray" aria-label="Files" data-tray>
+        <div class="tray-head">
+          <span class="hand">files</span>
+          <span class="free">
+            <span class="free-bar" aria-hidden="true">
+              <span data-free-bar></span>
+            </span>
+            <span data-free></span>
+          </span>
+        </div>
+        <ul class="queue" data-queue></ul>
+        <label class="drop" data-drop>
+          <input type="file" multiple class="quiet" data-files />
+          <span class="drop-line">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={DROP}></path>
+            </svg>
+            <span class="hand drop-say">
+              <span class="drop-first">drop files here</span>
+              <span class="drop-more">drop more</span>, paste with ctrl + v, or <u>pick them</u>
+            </span>
+          </span>
+          <span class="drop-note">each file goes up as it is, with its own five letters</span>
+        </label>
+      </section>
+
+      <div class="keep-row">
+        <label class="tick">
+          <input type="checkbox" class="quiet" checked data-kept />
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={BOX} class="tick-box"></path>
+            <path d={TICK} class="tick-mark"></path>
+          </svg>
+          <svg viewBox="0 0 24 24" class="tick-pin" aria-hidden="true">
+            <path d={PIN}></path>
+          </svg>
+          <span class="hand">keep them for good</span>
+        </label>
+        <span class="hand note">no [X] on pub.* until they're unpinned</span>
+      </div>
+
+      <div class="send-row">
+        <span class="hand open-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={KEY}></path>
+          </svg>
+          <span>open until this tab closes ·</span>
+          <button type="button" data-close>
+            close the shelf
+          </button>
+        </span>
+        <div class="send-group">
+          <kbd class="hint">ctrl + enter</kbd>
+          <button type="submit" class="send hand">
+            <span data-send-label>put them up</span>
+            <svg viewBox="0 0 26 16" aria-hidden="true">
+              <path d={ARROW}></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </fieldset>
+
+    <div
+      class="progress"
+      role="progressbar"
+      aria-label="Putting files up"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+      data-progress
+      hidden
+    >
+      <p class="progress-head">
+        <span class="hand">
+          putting up <b data-progress-name></b>, <span data-progress-which></span>
+        </span>
+        <span class="pct" data-pct>
+          0 %
+        </span>
+      </p>
+      <div class="track">
+        <svg
+          viewBox={`0 0 ${TRACK_LENGTH} ${TRACK_HEIGHT}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <clipPath id="up-so-far">
+              <rect x="0" y="0" width="0" height={TRACK_HEIGHT} data-ink></rect>
+            </clipPath>
+          </defs>
+          <path d={TRACK} class="track-pencil"></path>
+          <path d={TRACK} class="track-ink" clip-path="url(#up-so-far)"></path>
+        </svg>
+        <span class="blot" aria-hidden="true" data-blot></span>
+      </div>
+      <p class="progress-foot">
+        <span data-progress-meta></span>
+        <button type="button" class="hand" data-stop>
+          stop
+        </button>
+      </p>
+    </div>
+
+    <p class="error" role="alert" data-error hidden></p>
+  </form>
+
+  <template data-folder>
+    <li>
+      <label class="folder">
+        <input type="radio" name="folder" class="quiet" data-folder-pick />
+        <svg viewBox="0 0 24 24" class="ring" aria-hidden="true">
+          <path d={RING} class="ring-line"></path>
+          <path d={BLOT} class="ring-blot"></path>
+        </svg>
+        <svg viewBox="0 0 24 24" class="folder-icon" aria-hidden="true">
+          <path d={FOLDER}></path>
+        </svg>
+        <span class="folder-name" data-folder-name></span>
+        <span class="hand kept" data-folder-kept hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={PIN}></path>
+          </svg>
+          kept
+        </span>
+        <span class="folder-count" data-folder-count></span>
+      </label>
+    </li>
+  </template>
+
+  <template data-row>
+    <li class="row">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path data-row-icon></path>
+      </svg>
+      <span class="row-name">
+        <span class="row-file" data-row-name></span>
+        <span class="row-link">
+          pub…/<span data-row-id>{UNKNOWN_ID}</span>
+          <span data-row-ext></span>
+        </span>
+      </span>
+      <span class="row-size" data-row-size></span>
+      <span class="row-status">
+        <button type="button" class="hand row-out" data-row-out>
+          ×
+        </button>
+        <span class="hand row-sent">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d={TICK}></path>
+          </svg>
+          up
+        </span>
+        <span class="row-now">
+          <span class="mini" aria-hidden="true">
+            <span data-row-bar></span>
+          </span>
+          <span data-row-pct></span>
+        </span>
+        <span class="hand row-waiting">waiting</span>
+      </span>
+    </li>
+  </template>
+
+  <template data-link>
+    <li class="link-row">
+      <span class="thumb" data-thumb></span>
+      <span class="link-text">
+        <a class="link-url" target="_blank" rel="noopener" data-link-url>
+          {host}/<b data-link-id></b>
+          <span data-link-ext></span>
+        </a>
+        <span class="hand link-name" data-link-name></span>
+      </span>
+      <span class="hand link-actions">
+        <button type="button" data-link-copy>
+          copy
+        </button>
+        <a target="_blank" rel="noopener" data-link-open>
+          open ↗
+        </a>
+      </span>
+    </li>
+  </template>
+
+  <section class="done" aria-label="The links" data-done hidden>
+    <p class="hand note-line" data-done-head></p>
+    <ul class="links" data-links></ul>
+    <p class="error" data-done-stopped hidden></p>
+    <div class="actions hand">
+      <button type="button" data-copy-all></button>
+      <button type="button" data-again>
+        put up more
+      </button>
+    </div>
+    <p class="done-meta" data-done-meta></p>
+  </section>
+</BaseLayout>
+
+<script>
+  import "../scripts/pub";
+</script>
+
+<style>
+  .pub-head {
+    max-width: 40rem;
+  }
+
+  .crumb {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-dim);
+  }
+
+  .pub-head h1 {
+    margin: 1rem 0 0;
+    font-weight: 300;
+    line-height: 1.1;
+  }
+
+  .lede {
+    margin: 1.25rem 0 0;
+    color: var(--fg-dim);
+  }
+
+  .sheet,
+  .done {
+    max-width: 55rem;
+  }
+
+  .quiet {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .fields {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .fields[disabled] {
+    opacity: 0.85;
+  }
+
+  .note-line {
+    margin: 0;
+    font-weight: 300;
+    font-size: 1.1875rem;
+    color: var(--fg-dim);
+  }
+
+  .note {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .unlock-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem 1.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .count-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin: 3.5rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .count-line a {
+    color: var(--fg-link);
+  }
+
+  .part-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .part-head > .hand,
+  .tray-head > .hand {
+    font-weight: 300;
+    font-size: 1.0625rem;
+    color: var(--fg-dim);
+  }
+
+  .into {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .into span {
+    color: var(--cursor);
+  }
+
+  .page {
+    --sheet: light-dark(
+      color-mix(in srgb, var(--bg-main) 45%, white),
+      color-mix(in srgb, var(--bg-main) 90%, var(--fg-main))
+    );
+    --rule: light-dark(
+      color-mix(in srgb, var(--sheet) 88%, var(--fg-main)),
+      color-mix(in srgb, var(--sheet) 86%, var(--fg-main))
+    );
+    --indent: 1.875rem;
+    position: relative;
+    padding: 1.375rem 2.5rem 0.875rem;
+  }
+
+  .page > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .page-shadow {
+    fill: var(--fg-main);
+    opacity: 0.14;
+  }
+
+  .page-sheet {
+    fill: var(--sheet);
+  }
+
+  .tree {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .folder {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding-left: calc(var(--depth) * var(--indent));
+    border-bottom: 1px dashed var(--rule);
+    cursor: pointer;
+  }
+
+  .folder svg,
+  .kept svg {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    overflow: visible;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .ring-line {
+    stroke: var(--fg-dim);
+    stroke-width: 1.5;
+  }
+
+  .ring-blot {
+    fill: var(--cursor);
+    stroke: none;
+    opacity: 0;
+  }
+
+  .folder-icon {
+    stroke: var(--fg-main);
+  }
+
+  .folder-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .folder:has(input:checked) :is(.folder-name, .folder-icon) {
+    color: var(--cursor);
+    stroke: var(--cursor);
+  }
+
+  .folder:has(input:checked) .ring-blot {
+    opacity: 1;
+  }
+
+  .folder:has(input:focus-visible) .ring {
+    outline: 2px solid var(--cursor);
+    outline-offset: 2px;
+  }
+
+  .kept {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--red);
+  }
+
+  .kept[hidden] {
+    display: none;
+  }
+
+  .kept svg {
+    width: 1rem;
+    height: 1rem;
+    stroke: var(--red);
+  }
+
+  .folder-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .new-folder {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    min-height: 3.25rem;
+    padding-left: var(--indent);
+    color: var(--fg-dim);
+  }
+
+  .new-folder .hand {
+    font-size: 1.0625rem;
+  }
+
+  .new-folder .plus {
+    font-size: 1.375rem;
+    line-height: 1;
+  }
+
+  .new-folder input {
+    flex: 1;
+    min-width: 8.75rem;
+    padding: 0.25rem 0;
+    border: 0;
+    border-bottom: 1.5px dotted var(--fg-dim);
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--fg-main);
+    outline: none;
+  }
+
+  .new-folder input:focus {
+    border-bottom: 1.5px solid var(--cursor);
+  }
+
+  .new-folder input::placeholder {
+    color: var(--fg-dim);
+    opacity: 0.7;
+  }
+
+  .tray {
+    margin-top: 2.25rem;
+  }
+
+  .tray-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .free {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .free-bar,
+  .mini {
+    position: relative;
+    display: block;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+  }
+
+  .free-bar {
+    width: 4.5rem;
+  }
+
+  .free-bar span,
+  .mini span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 2px;
+    background: var(--fg-dim);
+  }
+
+  .queue {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .queue:not(:empty) {
+    border-top: 1px dashed var(--border);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    min-height: 3.25rem;
+    padding: 0.25rem;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .row > svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .row-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  .row-file {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row-link {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .row-size {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+  }
+
+  .row-status {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: flex-end;
+    width: 6rem;
+  }
+
+  .row-status > * {
+    display: none;
+  }
+
+  .row[data-state="queued"] .row-out,
+  .row[data-state="sent"] .row-sent,
+  .row[data-state="now"] .row-now,
+  .row[data-state="waiting"] .row-waiting {
+    display: inline-flex;
+  }
+
+  .row-out {
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 1.375rem;
+    line-height: 1;
+    color: var(--fg-dim);
+    cursor: pointer;
+  }
+
+  .row-out:hover,
+  .row-out:focus-visible {
+    color: var(--red);
+  }
+
+  .row-sent {
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9375rem;
+    color: var(--cursor);
+  }
+
+  .row-sent svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .row-now {
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .mini {
+    width: 3rem;
+    height: 3px;
+  }
+
+  .mini span {
+    background: var(--cursor);
+  }
+
+  .row-waiting {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .drop {
+    --tray: light-dark(
+      color-mix(in srgb, var(--bg-main) 70%, white),
+      color-mix(in srgb, var(--bg-main) 95%, var(--fg-main))
+    );
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 11.25rem;
+    padding: 1.5rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 12px 16px 13px 17px;
+    background: var(--tray);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+  }
+
+  .drop svg {
+    width: 1.875rem;
+    height: 1.875rem;
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .drop-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .drop-say {
+    font-size: 1.1875rem;
+  }
+
+  .drop-say u {
+    color: var(--fg-link);
+    text-underline-offset: 4px;
+  }
+
+  .drop-note {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  .drop:hover,
+  .drop:has(input:focus-visible),
+  .drop[data-over] {
+    border-color: var(--cursor);
+  }
+
+  .drop[data-over] {
+    background: color-mix(in srgb, var(--tray) 85%, var(--cursor));
+  }
+
+  .drop-more,
+  .tray[data-filled] .drop-first {
+    display: none;
+  }
+
+  .tray[data-filled] .drop {
+    min-height: 6rem;
+    margin-top: 0.75rem;
+    padding: 1rem;
+  }
+
+  .tray[data-filled] .drop-line {
+    flex-direction: row;
+    gap: 0.625rem;
+  }
+
+  .tray[data-filled] .drop svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .tray[data-filled] .drop-more {
+    display: inline;
+  }
+
+  .tray[data-filled] .drop-say {
+    font-size: 1.0625rem;
+  }
+
+  .keep-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1.25rem;
+    margin-top: 1.75rem;
+  }
+
+  .tick {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+
+  .tick svg {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    overflow: visible;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .tick-box {
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+  }
+
+  .tick-mark {
+    stroke: var(--cursor);
+    stroke-width: 2.4;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .tick input:checked + svg .tick-mark {
+    opacity: 1;
+  }
+
+  .tick input:focus-visible + svg {
+    outline: 2px solid var(--cursor);
+    outline-offset: 3px;
+  }
+
+  .tick .tick-pin {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+  }
+
+  .tick .hand {
+    font-size: 1.125rem;
+  }
+
+  .send-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 1.75rem;
+    margin-top: 1.75rem;
+    padding-top: 1.75rem;
+    border-top: 1px dashed var(--border);
+  }
+
+  .open-note {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.625rem;
+    font-weight: 300;
+    font-size: 1rem;
+    color: var(--fg-dim);
+  }
+
+  .open-note svg {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .open-note button,
+  .progress-foot button,
+  .actions button,
+  .actions a,
+  .link-actions button,
+  .link-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--fg-link);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .word {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1.5rem 0.75rem 1.125rem;
+    border-radius: 2px 4px 3px 2px;
+    background: var(--tape);
+    box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.45);
+    color: var(--fg-main);
+  }
+
+  .word svg {
+    flex: none;
+    width: 1.375rem;
+    height: 1.375rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .word .hand {
+    font-size: 1.125rem;
+  }
+
+  .word input {
+    width: 10rem;
+    min-width: 0;
+    padding: 0.25rem 0;
+    border: 0;
+    border-bottom: 1.5px dotted currentColor;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    color: inherit;
+    outline: none;
+  }
+
+  .word input:focus {
+    border-bottom: 1.5px solid var(--cursor);
+  }
+
+  .send-group {
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+  }
+
+  .hint {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--fg-dim);
+  }
+
+  @media (hover: none) {
+    .hint {
+      display: none;
+    }
+  }
+
+  .send {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0 1.75rem;
+    border: 2px solid currentColor;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    background: none;
+    font-size: 1.3125rem;
+    color: var(--fg-main);
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+
+  .send svg {
+    width: 1.625rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s;
+  }
+
+  .send:hover,
+  .send:focus-visible {
+    color: var(--cursor);
+  }
+
+  .send:hover svg,
+  .send:focus-visible svg {
+    transform: translateX(0.25rem);
+  }
+
+  .send:focus-visible {
+    outline: 2px solid var(--cursor);
+    outline-offset: 4px;
+  }
+
+  .send[disabled],
+  .fields[disabled] .send {
+    opacity: 0.5;
+    color: var(--fg-main);
+    cursor: wait;
+  }
+
+  .send[disabled] svg,
+  .fields[disabled] .send svg {
+    transform: none;
+  }
+
+  .progress {
+    margin-top: 2.25rem;
+  }
+
+  .progress-head,
+  .progress-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    margin: 0;
+  }
+
+  .progress-head .hand {
+    font-size: 1.125rem;
+  }
+
+  .progress-head b {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.875rem;
+    color: var(--cursor);
+  }
+
+  .pct {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+  }
+
+  .track {
+    position: relative;
+    height: 1.625rem;
+    margin-top: 0.625rem;
+  }
+
+  .track svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    fill: none;
+    stroke-linecap: round;
+  }
+
+  .track-pencil {
+    stroke: var(--border);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 7;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .track-ink {
+    stroke: var(--cursor);
+    stroke-width: 5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .blot {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0.75rem;
+    height: 0.6875rem;
+    margin: -0.375rem 0 0 -0.375rem;
+    border-radius: 48% 52% 46% 54%;
+    background: var(--cursor);
+  }
+
+  .progress-foot {
+    align-items: center;
+    margin-top: 0.625rem;
+  }
+
+  .progress-foot > span {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  .progress-foot button {
+    font-size: 1.0625rem;
+  }
+
+  .error {
+    margin: 1rem 0 0;
+    color: var(--red);
+  }
+
+  .note-line a {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--fg-link);
+    text-decoration: none;
+  }
+
+  .links {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    border-top: 1px dashed var(--border);
+    list-style: none;
+  }
+
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.125rem;
+    padding: 0.875rem 0.25rem;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .thumb {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 2px 3px 2px 4px;
+    background: var(--bg-alt);
+    transform: rotate(var(--tilt));
+  }
+
+  .thumb :is(img, video) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb svg {
+    width: 1.75rem;
+    height: 1.75rem;
+    fill: none;
+    stroke: var(--fg-dim);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .link-text {
+    display: flex;
+    flex: 1 1 16rem;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.35;
+  }
+
+  .link-url {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .link-url b {
+    font-weight: 400;
+    color: var(--cursor);
+  }
+
+  .link-name {
+    font-weight: 300;
+    font-size: 0.9375rem;
+    color: var(--fg-dim);
+  }
+
+  .link-actions {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 1.125rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.75rem;
+    margin-top: 1.25rem;
+    font-size: 1.1875rem;
+  }
+
+  .done-meta {
+    margin: 2.5rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--fg-dim);
+  }
+
+  @media (max-width: 40rem) {
+    .page {
+      --indent: 1.125rem;
+      padding: 0.875rem 1rem 0.5rem;
+    }
+
+    .new-folder {
+      padding-left: 0;
+    }
+
+    .drop {
+      min-height: 9.375rem;
+    }
+
+    .row-status {
+      width: 4rem;
+    }
+
+    .word input {
+      width: 6rem;
+    }
+
+    .thumb {
+      width: 3.25rem;
+      height: 3.25rem;
+    }
+
+    .link-url {
+      font-size: 0.8125rem;
+    }
+  }
+</style>
