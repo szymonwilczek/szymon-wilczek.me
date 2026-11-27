@@ -1,0 +1,32 @@
+# Files that stay up, put there from /pub/ and open to anyone.
+# See README.md.
+name = "pub"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+routes = [{ pattern = "pub.szymon-wilczek.me", custom_domain = true }]
+workers_dev = false
+preview_urls = false
+
+[vars]
+ORIGINS = "https://szymon-wilczek.me,http://localhost:4321"
+
+# the bytes, one value a file under its five letters
+[[kv_namespaces]]
+binding = "BYTES"
+
+# folders, names, pins, sizes and dates
+[[d1_databases]]
+binding = "DB"
+database_name = "pub"
+
+# uploads and new folders, per address
+[[ratelimits]]
+name = "WRITES"
+namespace_id = "1033"
+simple = { limit = 60, period = 60 }
+
+# wrong passwords, from /pub/ or the /~/ prompt, per address
+[[ratelimits]]
+name = "GUESSES"
+namespace_id = "1034"
+simple = { limit = 10, period = 60 }
