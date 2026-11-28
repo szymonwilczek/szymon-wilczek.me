@@ -98,7 +98,8 @@
     "url": "https://github.com/szymonwilczek/arete.nvim",
     "excerpt": "Neovim plugin that ports Protesilaos GNU Emacs themes.",
     "language": "Lua",
-    "date": "2026-05-22"
+    "date": "2026-05-22",
+    "archived": true
   },
   {
     "title": "Maturator",
